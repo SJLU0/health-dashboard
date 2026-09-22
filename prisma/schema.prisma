@@ -13,3 +13,13 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model HeartRateMeasurement {
+  id         Int      @id @default(autoincrement())
+  deviceUuid String
+  bpm        Int
+  measuredAt DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([deviceUuid, measuredAt])
+}

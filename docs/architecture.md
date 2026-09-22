@@ -139,15 +139,17 @@ health-dashboard/
 ## 預計 API
 
 ```text
-POST /api/measurements   # 上傳心率或血氧
-POST /api/sleep          # 上傳睡眠摘要與階段
-GET  /api/dashboard      # 取得儀表板摘要
+POST /api/heart-rates   # 上傳心率
+POST /api/spo2          # 上傳血氧
+POST /api/sleep         # 上傳睡眠摘要與階段
+GET  /api/dashboard     # 取得儀表板摘要
 ```
 
 ## 資料處理原則
 
 - 時間以 UTC 儲存，顯示時再轉換成使用者時區。
-- 心率與血氧使用「裝置、類型、測量時間」識別重複資料。
+- 心率與血氧分別使用獨立資料表與 API，避免不同健康資料的欄位與邏輯相互影響。
+- 心率使用「裝置識別碼、測量時間」作為複合唯一條件，避免重複儲存同一筆資料。
 - 睡眠資料保留原始開始與結束時間，跨日轉換由 Service 集中處理。
 - Zepp 裝置識別資料、API 金鑰與資料庫連線資訊不寫入版本控制。
 - PostgreSQL 連線字串儲存在 `.env`，並將 `.env` 排除於版本控制。
@@ -166,11 +168,13 @@ GET  /api/dashboard      # 取得儀表板摘要
 - 建立 `health_dashboard` Database。
 - 安裝 Prisma CLI 與 Prisma Client 6.12.0。
 - 完成 Prisma 初始化與 PostgreSQL 連線設定。
+- 定義 `HeartRateMeasurement` Prisma Model，儲存裝置識別碼、BPM、測量時間與資料建立時間。
+- 建立初始資料庫遷移紀錄，在 PostgreSQL 建立心率資料表與複合唯一索引。
 
 ### 待完成
 
 - 從 Device App 讀取血氧與睡眠資料。
 - 將感測資料透過 Side Service POST 至自有 Nuxt API。
 - 建立 Nuxt Controller、Service 與 Repository 分層。
-- 定義 Prisma 資料模型，建立 Migration 與 PostgreSQL 資料表。
+- 定義血氧與睡眠的 Prisma 資料模型與資料庫遷移紀錄。
 - 將前端轉為 Nuxt，並接上真實儀表板 API。
