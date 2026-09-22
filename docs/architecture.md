@@ -46,6 +46,44 @@ Device App 不直接連線 PostgreSQL。手錶與 Side Service 之間使用藍�
 - **Device App**：讀取感測資料、處理手錶上的交互，並將資料交給 Side Service。
 - **Side Service**：運行於手機 Zepp App，負責藍牙訊息處理、HTTP 請求與錯誤回應。
 
+#### 感測資料取得方式
+
+Zepp OS 不會自動把手錶的健康資料送到本專案後端。專案需要在 Zepp OS Mini App 的 Device App 中撰寫 JavaScript，依資料類型呼叫 Zepp OS 官方開放的 Sensor API。這裡修改的是本專案的 Mini App，不是修改手機上的官方 Zepp App。
+
+Device App 運行在 Amazfit Bip 6，程式主要位於 `zepp-health-sync-app/page/`。讀取感測資料前，需要先在 `zepp-health-sync-app/app.json` 宣告對應權限，再從 `@zos/sensor` 引入感測器 API。例如心率使用 `HeartRate`：
+
+```js
+import { HeartRate } from "@zos/sensor";
+
+const heartRate = new HeartRate();
+const bpm = heartRate.getLast();
+```
+
+不同資料需要呼叫不同的官方 API：
+
+```text
+心率 → HeartRate
+血氧 → BloodOxygen
+睡眠 → Sleep
+```
+
+Device App 取得資料後，使用 ZML 的 `this.request()`，透過 Bluetooth 將資料傳給手機 Zepp App 中運行的 Side Service。Side Service 程式位於 `zepp-health-sync-app/app-side/`，使用 `onRequest()` 接收 Device App 的訊息，再以 `fetch()` 將資料 POST 至 Nuxt API。
+
+```text
+【硬體：Amazfit Bip 6】
+【軟體：Device App JavaScript】
+呼叫 Zepp OS Sensor API 取得感測資料
+          ↓ this.request()／Bluetooth
+【硬體：手機】
+【軟體：官方 Zepp App 中的 Side Service】
+接收感測資料
+          ↓ fetch()／HTTPS POST
+【硬體：Mac 或伺服器】
+【軟體：Nuxt Server API】
+```
+
+Device App 負責呼叫手錶感測器；Side Service 本身不直接讀取手錶感測器，只負責接收 Device App 傳來的資料並連接外部網路。
+
 ### Nuxt Server
 
 - **Route**：使用 `server/api` 定義 URL 與 HTTP Method。
@@ -53,6 +91,21 @@ Device App 不直接連線 PostgreSQL。手錶與 Side Service 之間使用藍�
 - **Service**：處理感測資料轉換、去重、時間標準化與儀表板摘要邏輯。
 - **Repository**：集中封裝 Prisma 查詢，不處理 HTTP 細節。
 - **Schema**：使用 Zod 驗證 Zepp Side Service 傳入的 JSON。
+
+### PostgreSQL 與 Prisma
+
+- **PostgreSQL 18**：負責實際儲存健康資料，專案使用 `health_dashboard` Database 與預設 `public` Schema。
+- **Prisma CLI 6.12.0**：開發階段用於管理資料模型、建立 Migration 與產生 Prisma Client。
+- **Prisma Client 6.12.0**：由 Repository 層使用，以型別安全的 API 查詢 PostgreSQL。
+- **PostgreSQL Connector**：第一階段使用 Prisma 內建 Connector，暫不額外引入 `pg` Driver Adapter。
+- **Prisma Schema**：使用 `prisma/schema.prisma` 定義 Model、欄位、關聯、唯一約束與索引。
+- **Migration**：由 Prisma Migrate 根據 Schema 建立及變更資料表，不在 GUI 中手動維護表結構。
+
+Prisma 不取代 PostgreSQL，而是位於 Nuxt Repository 與 PostgreSQL 之間的資料存取層：
+
+```text
+Repository → Prisma Client → PostgreSQL Connector → PostgreSQL
+```
 
 ### Nuxt Vue 前端
 
@@ -78,7 +131,7 @@ health-dashboard/
 │   └── types/                    # 前後端共用型別
 ├── prisma/
 │   └── schema.prisma             # PostgreSQL 資料模型
-├── zepp-app/                         # Zepp OS Device App + Side Service
+├── zepp-health-sync-app/             # Zepp OS Device App + Side Service
 ├── nuxt.config.ts
 └── package.json
 ```
@@ -97,6 +150,7 @@ GET  /api/dashboard      # 取得儀表板摘要
 - 心率與血氧使用「裝置、類型、測量時間」識別重複資料。
 - 睡眠資料保留原始開始與結束時間，跨日轉換由 Service 集中處理。
 - Zepp 裝置識別資料、API 金鑰與資料庫連線資訊不寫入版本控制。
+- PostgreSQL 連線字串儲存在 `.env`，並將 `.env` 排除於版本控制。
 
 ## 目前進度
 
@@ -106,11 +160,17 @@ GET  /api/dashboard      # 取得儀表板摘要
 - 建立 API Level 4.0 的 Zepp OS Fetch API 範例。
 - 完成 Mini App 在 Bip 6 的實機安裝。
 - 確認 Bip 6 可透過 Side Service 取得官方範例的外部測試資料。
+- 完成 Device App 呼叫 `HeartRate` Sensor API，取得 Bip 6 的真實心率資料。
+- 完成 Device App 將心率透過 Bluetooth 傳送至手機 Side Service，並確認 Side Service 成功接收。
+- 安裝並啟動本機 PostgreSQL 18。
+- 建立 `health_dashboard` Database。
+- 安裝 Prisma CLI 與 Prisma Client 6.12.0。
+- 完成 Prisma 初始化與 PostgreSQL 連線設定。
 
 ### 待完成
 
-- 從 Device App 讀取心率、血氧與睡眠資料。
+- 從 Device App 讀取血氧與睡眠資料。
 - 將感測資料透過 Side Service POST 至自有 Nuxt API。
 - 建立 Nuxt Controller、Service 與 Repository 分層。
-- 建立 Prisma 資料模型與 PostgreSQL 資料表。
+- 定義 Prisma 資料模型，建立 Migration 與 PostgreSQL 資料表。
 - 將前端轉為 Nuxt，並接上真實儀表板 API。
