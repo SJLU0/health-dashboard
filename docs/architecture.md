@@ -48,7 +48,8 @@ Device App 不直接連線 PostgreSQL。手錶與 Side Service 之間使用藍�
 
 #### 感測資料取得方式
 
-Zepp OS 不會自動把手錶的健康資料送到本專案後端。專案需要在 Zepp OS Mini App 的 Device App 中撰寫 JavaScript，依資料類型呼叫 Zepp OS 官方開放的 Sensor API。這裡修改的是本專案的 Mini App，不是修改手機上的官方 Zepp App。
+Zepp OS 不會自動把手錶的健康資料送到本專案後端。
+專案需要在 Zepp OS Mini App 的 Device App 中撰寫 JavaScript，依資料類型呼叫 Zepp OS 官方開放的 Sensor API。這裡修改的是本專案的 Mini App，不是修改手機上的官方 Zepp App。
 
 Device App 運行在 Amazfit Bip 6，程式主要位於 `zepp-health-sync-app/page/`。讀取感測資料前，需要先在 `zepp-health-sync-app/app.json` 宣告對應權限，再從 `@zos/sensor` 引入感測器 API。例如心率使用 `HeartRate`：
 
@@ -170,6 +171,8 @@ GET  /api/dashboard     # 取得儀表板摘要
 - 完成 Prisma 初始化與 PostgreSQL 連線設定。
 - 定義 `HeartRateMeasurement` Prisma Model，儲存裝置識別碼、BPM、測量時間與資料建立時間。
 - 建立初始資料庫遷移紀錄，在 PostgreSQL 建立心率資料表與複合唯一索引。
+- 將 Vite + Vue 3 前端轉為 Nuxt 4，搬移現有儀表板首頁、`SummaryCard` 元件與 Tailwind CSS 設定。
+- 完成 Nuxt 4.5.2 開發伺服器啟動驗證，並確認心率、步數、睡眠、壓力與血氧五張摘要卡片可正常顯示。
 
 ### 待完成
 
@@ -177,4 +180,4 @@ GET  /api/dashboard     # 取得儀表板摘要
 - 將感測資料透過 Side Service POST 至自有 Nuxt API。
 - 建立 Nuxt Controller、Service 與 Repository 分層。
 - 定義血氧與睡眠的 Prisma 資料模型與資料庫遷移紀錄。
-- 將前端轉為 Nuxt，並接上真實儀表板 API。
+- 將 Nuxt 前端接上真實儀表板 API。

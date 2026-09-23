@@ -1,7 +1,3 @@
-<script setup>
-import SummaryCard from "../components/SummaryCard.vue";
-</script>
-
 <template>
   <main>
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

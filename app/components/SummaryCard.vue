@@ -14,7 +14,7 @@ defineProps({
  *
  * 用途：顯示健康摘要資訊，比如睡眠時間、心率、步數
  *
- * 使用頁面：src/views/HomeView.vue
+ * 使用頁面：app/pages/index.vue
  -->
 <template>
   <div class="rounded-xl bg-gray-200 border p-5">
