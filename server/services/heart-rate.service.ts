@@ -36,7 +36,7 @@ export function createHeartRateService(
   // 將 ISO 時間字串轉換成 JavaScript Date。
   const measuredAt = new Date(input.measuredAt);
 
-  //如果 measuredAt是無效數字，就拋錯
+  // 如果 measuredAt 是無效日期，就拋錯
   if (Number.isNaN(measuredAt.getTime())) {
     throw new Error("measuredAt 必須是有效的日期時間");
   }
