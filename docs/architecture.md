@@ -108,6 +108,68 @@ Prisma 不取代 PostgreSQL，而是位於 Nuxt Repository 與 PostgreSQL 之間
 Repository → Prisma Client → PostgreSQL Connector → PostgreSQL
 ```
 
+#### Prisma 功能與常用指令
+
+以下指令均在 `health-dashboard` 專案根目錄執行，並需先確認 Postgres.app 處於 Running。
+
+| 功能 | 在本專案的用途 | 常用指令或位置 |
+| --- | --- | --- |
+| Prisma Schema | 定義 Model、欄位、關聯、唯一條件與索引 | `prisma/schema.prisma` |
+| Format | 統一 `schema.prisma` 排版 | `npx prisma format` |
+| Validate | 檢查 Schema 與 Prisma 設定是否有效 | `npx prisma validate` |
+| Prisma Migrate Dev | 開發時根據 Schema 變更產生 SQL、建立資料庫遷移紀錄並套用到本機 PostgreSQL | `npx prisma migrate dev --name <change_name>` |
+| Migration Status | 檢查資料庫是否已套用所有 Migration | `npx prisma migrate status` |
+| Prisma Migrate Deploy | 未來部署時套用已納入版控的 Migration，不產生新 Migration | `npx prisma migrate deploy` |
+| Prisma Generate | 根據 Schema 重新產生 Prisma Client | `npx prisma generate` |
+| Prisma Client | 供 Nuxt Repository 以 `create`、`findFirst`、`findMany` 等 API 讀寫 PostgreSQL | 由後端 TypeScript 程式引入使用 |
+| Prisma Studio | 以瀏覽器 GUI 查看與編輯本機資料 | `npx prisma studio` |
+| Prisma Seed | 未來可產生心率趨勢圖所需的本機測試資料，目前尚未設定 | `npx prisma db seed` |
+
+Postgres.app 主畫面只顯示 Database，不會展開顯示 Schema 與 Table。`npx prisma studio` 會在瀏覽器開啟本機圖形介面，可用來查看 `HeartRateMeasurement` 的欄位與資料列。Prisma Studio 只是開發階段的查看與編輯工具，PostgreSQL 仍負責實際儲存資料。
+
+#### 為何使用 Prisma ORM
+
+如果後端直接操作 SQL，通常需要自行處理：
+
+```text
+建立資料庫連線
+準備 SQL
+放入查詢參數
+執行查詢
+讀取查詢結果
+將結果轉換成 TypeScript 物件
+處理資料庫錯誤
+```
+
+Prisma ORM 不是取代 PostgreSQL，而是在 Nuxt 後端與 SQL 之間提供較高階的資料存取 API。Prisma Client 將常見 CRUD 操作包裝成方法：
+
+```text
+create()     # 新增資料
+findFirst()  # 查詢第一筆符合條件的資料
+findMany()   # 查詢多筆資料
+update()     # 更新資料
+delete()     # 刪除資料
+upsert()     # 存在時更新，不存在時新增
+```
+
+因此 Prisma 的定位是將常見 SQL 操作轉為有 TypeScript 型別與自動補全的 API，降低重複程式與欄位型別錯誤。後端仍需要理解資料表、索引、關聯、交易與查詢效能；複雜查詢必要時仍可使用原生 SQL。
+
+#### 資料庫結構變更流程
+
+```text
+修改 prisma/schema.prisma
+          ↓
+npx prisma format / validate
+          ↓
+npx prisma migrate dev --name <change_name>
+          ↓
+產生 migration.sql 並更新 PostgreSQL
+          ↓
+重新產生 Prisma Client
+```
+
+`prisma/schema.prisma`、`prisma/migrations/` 與 `prisma.config.ts` 需要納入版本控制；`.env`、本機 PostgreSQL 資料與自動產生的 Prisma Client 不納入版本控制。
+
 ### Nuxt Vue 前端
 
 - 使用 Vue 3 Composition API 建立儀表板。
