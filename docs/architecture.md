@@ -112,18 +112,18 @@ Repository → Prisma Client → PostgreSQL Connector → PostgreSQL
 
 以下指令均在 `health-dashboard` 專案根目錄執行，並需先確認 Postgres.app 處於 Running。
 
-| 功能 | 在本專案的用途 | 常用指令或位置 |
-| --- | --- | --- |
-| Prisma Schema | 定義 Model、欄位、關聯、唯一條件與索引 | `prisma/schema.prisma` |
-| Format | 統一 `schema.prisma` 排版 | `npx prisma format` |
-| Validate | 檢查 Schema 與 Prisma 設定是否有效 | `npx prisma validate` |
-| Prisma Migrate Dev | 開發時根據 Schema 變更產生 SQL、建立資料庫遷移紀錄並套用到本機 PostgreSQL | `npx prisma migrate dev --name <change_name>` |
-| Migration Status | 檢查資料庫是否已套用所有 Migration | `npx prisma migrate status` |
-| Prisma Migrate Deploy | 未來部署時套用已納入版控的 Migration，不產生新 Migration | `npx prisma migrate deploy` |
-| Prisma Generate | 根據 Schema 重新產生 Prisma Client | `npx prisma generate` |
-| Prisma Client | 供 Nuxt Repository 以 `create`、`findFirst`、`findMany` 等 API 讀寫 PostgreSQL | 由後端 TypeScript 程式引入使用 |
-| Prisma Studio | 以瀏覽器 GUI 查看與編輯本機資料 | `npx prisma studio` |
-| Prisma Seed | 未來可產生心率趨勢圖所需的本機測試資料，目前尚未設定 | `npx prisma db seed` |
+| 功能                  | 在本專案的用途                                                                 | 常用指令或位置                                |
+| --------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| Prisma Schema         | 定義 Model、欄位、關聯、唯一條件與索引                                         | `prisma/schema.prisma`                        |
+| Format                | 統一 `schema.prisma` 排版                                                      | `npx prisma format`                           |
+| Validate              | 檢查 Schema 與 Prisma 設定是否有效                                             | `npx prisma validate`                         |
+| Prisma Migrate Dev    | 開發時根據 Schema 變更產生 SQL、建立資料庫遷移紀錄並套用到本機 PostgreSQL      | `npx prisma migrate dev --name <change_name>` |
+| Migration Status      | 檢查資料庫是否已套用所有 Migration                                             | `npx prisma migrate status`                   |
+| Prisma Migrate Deploy | 未來部署時套用已納入版控的 Migration，不產生新 Migration                       | `npx prisma migrate deploy`                   |
+| Prisma Generate       | 根據 Schema 重新產生 Prisma Client                                             | `npx prisma generate`                         |
+| Prisma Client         | 供 Nuxt Repository 以 `create`、`findFirst`、`findMany` 等 API 讀寫 PostgreSQL | 由後端 TypeScript 程式引入使用                |
+| Prisma Studio         | 以瀏覽器 GUI 查看與編輯本機資料                                                | `npx prisma studio`                           |
+| Prisma Seed           | 未來可產生心率趨勢圖所需的本機測試資料，目前尚未設定                           | `npx prisma db seed`                          |
 
 Postgres.app 主畫面只顯示 Database，不會展開顯示 Schema 與 Table。`npx prisma studio` 會在瀏覽器開啟本機圖形介面，可用來查看 `HeartRateMeasurement` 的欄位與資料列。Prisma Studio 只是開發階段的查看與編輯工具，PostgreSQL 仍負責實際儲存資料。
 
@@ -172,6 +172,8 @@ npx prisma migrate dev --name <change_name>
 
 ### Nuxt Vue 前端
 
+- 使用 Nuxt 3.21.11。
+- Nuxt 3 已結束官方一般維護；本專案用於學習與求職展示，若未來正式上線，需重新評估 Nuxt 4 升級與安全維護。
 - 使用 Vue 3 Composition API 建立儀表板。
 - 使用 Nuxt `useFetch` 或 `$fetch` 存取內部 API。
 - 顯示心率、血氧與睡眠的摘要及趨勢。
@@ -217,29 +219,4 @@ GET  /api/dashboard     # 取得儀表板摘要
 - Zepp 裝置識別資料、API 金鑰與資料庫連線資訊不寫入版本控制。
 - PostgreSQL 連線字串儲存在 `.env`，並將 `.env` 排除於版本控制。
 
-## 目前進度
-
-### 已完成
-
-- 確認 Amazfit Bip 6 的 API Level 為 4.2。
-- 建立 API Level 4.0 的 Zepp OS Fetch API 範例。
-- 完成 Mini App 在 Bip 6 的實機安裝。
-- 確認 Bip 6 可透過 Side Service 取得官方範例的外部測試資料。
-- 完成 Device App 呼叫 `HeartRate` Sensor API，取得 Bip 6 的真實心率資料。
-- 完成 Device App 將心率透過 Bluetooth 傳送至手機 Side Service，並確認 Side Service 成功接收。
-- 安裝並啟動本機 PostgreSQL 18。
-- 建立 `health_dashboard` Database。
-- 安裝 Prisma CLI 與 Prisma Client 6.12.0。
-- 完成 Prisma 初始化與 PostgreSQL 連線設定。
-- 定義 `HeartRateMeasurement` Prisma Model，儲存裝置識別碼、BPM、測量時間與資料建立時間。
-- 建立初始資料庫遷移紀錄，在 PostgreSQL 建立心率資料表與複合唯一索引。
-- 將 Vite + Vue 3 前端轉為 Nuxt 4，搬移現有儀表板首頁、`SummaryCard` 元件與 Tailwind CSS 設定。
-- 完成 Nuxt 4.5.2 開發伺服器啟動驗證，並確認心率、步數、睡眠、壓力與血氧五張摘要卡片可正常顯示。
-
-### 待完成
-
-- 從 Device App 讀取血氧與睡眠資料。
-- 將感測資料透過 Side Service POST 至自有 Nuxt API。
-- 建立 Nuxt Controller、Service 與 Repository 分層。
-- 定義血氧與睡眠的 Prisma 資料模型與資料庫遷移紀錄。
-- 將 Nuxt 前端接上真實儀表板 API。
+開發歷程、驗證結果與下一步工作記錄於 [`dev-diary.md`](./dev-diary.md)。
