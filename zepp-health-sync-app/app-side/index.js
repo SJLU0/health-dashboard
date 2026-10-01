@@ -41,6 +41,45 @@ async function fetchData(res) {
   }
 }
 
+async function uploadHeartRate(deviceUuid, bpm, measuredAt, res) {
+  try {
+    const response = await fetch({
+      url: "http://10.51.63.25:3002/api/heart-rates",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        deviceUuid,
+
+        bpm,
+        measuredAt,
+      }),
+    });
+
+    const resBody =
+      typeof response.body === "string"
+        ? JSON.parse(response.body)
+        : response.body;
+
+    console.log("[HEART_RATE] upload response:", resBody);
+
+    // fetch 成功時回覆手錶
+    res(null, {
+      result: resBody,
+    });
+  } catch (error) {
+    console.log("[HEART_RATE] upload error:", error);
+
+    // fetch 失敗時回覆手錶
+    res(null, {
+      result: {
+        success: false,
+      },
+    });
+  }
+}
+
 AppSideService(
   BaseSideService({
     onInit() {},
@@ -57,17 +96,16 @@ AppSideService(
 
       // 接收手錶傳來的心率
       if (req.method === "UPLOAD_HEART_RATE") {
-        const { bpm } = req.params || {};
+        const { deviceUuid, bpm, measuredAt } = req.params || {};
 
-        console.log(`[HEART_RATE] received bpm=${bpm}`);
+        console.log(
+          `[HEART_RATE] received deviceUuid=${deviceUuid}, bpm=${bpm}, measuredAt=${measuredAt}`,
+        );
 
         // 回覆手錶，表示 Side Service 已收到心率
-        res(null, {
-          result: {
-            received: true,
-            bpm,
-          },
-        });
+        uploadHeartRate(deviceUuid, bpm, measuredAt, res);
+
+        return;
       }
     },
 

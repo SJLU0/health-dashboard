@@ -219,4 +219,93 @@ GET  /api/dashboard     # 取得儀表板摘要
 - Zepp 裝置識別資料、API 金鑰與資料庫連線資訊不寫入版本控制。
 - PostgreSQL 連線字串儲存在 `.env`，並將 `.env` 排除於版本控制。
 
-開發歷程、驗證結果與下一步工作記錄於 [`dev-diary.md`](./dev-diary.md)。
+## 相關文件
+
+- 10 月以前完成的環境建置與開發成果：[`september-milestones.md`](./september-milestones.md)
+- 10 月起的每日進度與理解：[`dev-diary.md`](./dev-diary.md)
+
+## Repository 與 DAO 的比較
+
+### DAO ＋ JDBC
+
+```text
+以前：DAO ＋ JDBC
+
+Service
+   ↓
+DAO
+   ├─ 取得資料庫連線 Connection
+   ├─ 手動撰寫 SQL
+   ├─ 使用 PreparedStatement 綁定參數
+   ├─ 執行 SQL
+   ├─ 讀取 ResultSet
+   ├─ 將結果轉換成 Java Entity
+   └─ 關閉資料庫連線
+   ↓
+Database
+```
+
+DAO（Data Access Object，資料存取物件）偏向處理「如何操作資料庫」。開發者需要處理 SQL、參數綁定、查詢結果轉換與連線生命週期等細節。
+
+### Spring Boot＋Spring Data JPA
+
+```text
+Spring Boot：Repository ＋ Spring Data JPA
+
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ├─ 繼承 JpaRepository
+   ├─ 使用 save()、findById()、findAll()
+   └─ 可透過方法名稱產生查詢
+          ↓
+   JPA／Hibernate
+   ├─ 管理 Entity 映射
+   ├─ 產生並執行 SQL
+   ├─ 綁定查詢參數
+   └─ 管理資料庫連線
+          ↓
+       Database
+```
+
+Repository 表達應用程式需要保存或取得哪些 Entity；JPA／Hibernate 負責底層 SQL、物件映射與連線等工作。
+
+### Nuxt＋Prisma
+
+```text
+本專案：Repository ＋ Prisma
+
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ├─ 表達專案需要的資料操作
+   └─ 呼叫 create()、findFirst() 等 Prisma 方法
+          ↓
+       Prisma
+       ├─ 管理資料庫連線
+       ├─ 產生並執行 SQL
+       ├─ 安全綁定參數
+       ├─ 轉換查詢結果
+       └─ 產生 TypeScript 型別
+          ↓
+       PostgreSQL
+```
+
+Prisma 已承擔過去 DAO 的大部分底層工作。本專案的 Repository 主要負責將 Prisma 方法包裝成符合專案語意的資料操作，例如「新增心率記錄」或「取得最新心率」。
+
+```text
+DAO ＋ JDBC
+→ 開發者親自處理 SQL、連線與查詢結果轉換
+
+Spring Boot ＋ Spring Data JPA
+→ Repository 描述 Java Entity 的資料操作
+→ JPA／Hibernate 處理底層 SQL
+
+Nuxt ＋ Prisma
+→ Repository 描述專案需要的資料操作
+→ Prisma 處理底層 SQL
+```

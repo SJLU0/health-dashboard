@@ -2,6 +2,8 @@
 import * as hmUI from "@zos/ui";
 // 心率感測器
 import { HeartRate } from "@zos/sensor";
+// 保存這次 Mini App 安裝專屬的手錶識別碼
+import { LocalStorage } from "@zos/storage";
 // App 日誌工具
 import { log as Logger } from "@zos/utils";
 // Zepp OS Device App 與 Side Service 的通訊基底
@@ -17,6 +19,27 @@ const logger = Logger.getLogger("health_sync");
 
 // 建立心率感測器實例
 const heartRate = new HeartRate();
+
+// 建立 Device App（手錶）的本機儲存空間
+const localStorage = new LocalStorage();
+
+// 讀取既有識別碼；第一次執行時建立並保存一組新的識別碼
+function getOrCreateDeviceUuid() {
+  const savedDeviceUuid = localStorage.getItem("deviceUuid");
+
+  if (typeof savedDeviceUuid === "string" && savedDeviceUuid !== "") {
+    return savedDeviceUuid;
+  }
+
+  const newDeviceUuid = `bip6-${Date.now()}-${Math.floor(Math.random() * 1000000000)}`;
+
+  localStorage.setItem("deviceUuid", newDeviceUuid);
+
+  return newDeviceUuid;
+}
+
+// 同一次安裝會持續使用相同的手錶識別碼
+const deviceUuid = getOrCreateDeviceUuid();
 
 // 保存顯示心率結果的文字元件，避免重複建立
 let textWidget;
@@ -65,11 +88,15 @@ Page(
         return;
       }
 
+      const measuredAt = new Date().toISOString();
+
       // 透過 Bluetooth 將心率傳給手機 Zepp App 裡的 Side Service
       this.request({
         method: "UPLOAD_HEART_RATE",
         params: {
+          deviceUuid,
           bpm,
+          measuredAt,
         },
       })
         // 記錄 Side Service 成功回傳的結果
@@ -81,5 +108,5 @@ Page(
           logger.log(`upload error: ${JSON.stringify(error)}`);
         });
     },
-  })
+  }),
 );
