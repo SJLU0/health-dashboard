@@ -221,7 +221,7 @@ GET  /api/dashboard     # 取得儀表板摘要
 
 ## 相關文件
 
-- 10 月以前完成的環境建置與開發成果：[`september-milestones.md`](./september-milestones.md)
+- 10 月以前完成的環境建置與開發成果：[`sep-milestones.md`](./sep-milestones.md)
 - 10 月起的每日進度與理解：[`dev-diary.md`](./dev-diary.md)
 
 ## Repository 與 DAO 的比較

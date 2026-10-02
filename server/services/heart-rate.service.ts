@@ -1,4 +1,7 @@
-import { createHeartRateMeasurement, getHeartRateMeasurement } from "../repositories/heart-rate.repository";
+import {
+  createHeartRateMeasurement,
+  getLatestHeartRateMeasurement,
+} from "../repositories/heart-rate.repository";
 
 // 定義 createHeartRateService 函式接收的原始輸入資料。
 interface CreateHeartRateServiceInput {
@@ -47,11 +50,9 @@ export function createHeartRateService(
     bpm: input.bpm,
     measuredAt,
   });
-
 }
 
-
-// 從 Repository 取得一筆心率資料並交回 Controller
-export function getHeartRateService() {
-  return getHeartRateMeasurement();
+// 從 Repository 取得最新一筆心率資料並交回 Controller
+export function getLatestHeartRateService() {
+  return getLatestHeartRateMeasurement();
 }

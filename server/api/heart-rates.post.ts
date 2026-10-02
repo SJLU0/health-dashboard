@@ -6,15 +6,15 @@ export default defineEventHandler(
     const body = await readBody(event);
 
     // 將資料交給 Service 驗證並寫入資料庫。
-    const heartRateMeasurement = await createHeartRateService(body);
+    const createdHeartRateMeasurement = await createHeartRateService(body);
 
-    // 新增成功，設定 HTTP 狀態碼為 201 Created。
+    //201 建立一筆新資料成功
     setResponseStatus(event, 201);
 
     // 將新增完成的心率資料回傳給呼叫端。
     return {
       success: true,
-      data: heartRateMeasurement,
+      data: createdHeartRateMeasurement,
     };
   }
 );

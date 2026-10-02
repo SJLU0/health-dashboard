@@ -1,6 +1,6 @@
 # 開發紀錄
 
-本文件從 2026 年 10 月開始，按日期記錄每日進度、理解與待處理事項。9 月完成的環境建置與開發成果記錄於 [`september-milestones.md`](./september-milestones.md)，系統目前的設計則以 [`architecture.md`](./architecture.md) 為準。
+本文件從 2026 年 10 月開始，按日期記錄每日進度、理解與待處理事項。9 月完成的環境建置與開發成果記錄於 [`sep-milestones.md`](./sep-milestones.md)，系統目前的設計則以 [`architecture.md`](./architecture.md) 為準。
 
 ## 2026-10-01
 
