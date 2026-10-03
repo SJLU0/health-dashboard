@@ -20,7 +20,7 @@
 ## Nuxt 前後端
 
 - 將 Vite + Vue 3 前端轉為 Nuxt，搬移儀表板首頁、`SummaryCard` 元件與 Tailwind CSS 設定。
-- 遷移過程曾在 Nuxt 4.5.2 驗證心率、步數、睡眠、壓力與血氧五張摘要卡片可正常顯示。
+- 遷移過程曾在 Nuxt 4.5.2 驗證健康摘要卡片可正常顯示。
 - 為了模仿常見既有企業專案，將專案從 Nuxt 4.5.2 調整為 Nuxt 3.21.11。
 - 保留 `app/` 作為 Vue 前端原始碼目錄，並保留根目錄 `server/` 作為 Nitro 後端目錄。
 - 建立心率資料的 Controller、Service 與 Repository 分層。

@@ -4,11 +4,13 @@
 
 將 Amazfit Bip 6 取得的感測資料，透過 Zepp OS Mini App 與手機上的 Side Service 傳送至 Nuxt API，儲存於 PostgreSQL，最後由 Nuxt 前端呈現健康摘要與趨勢。
 
-第一階段只處理手錶可取得的感測資料：
+第一階段處理手錶可取得的健康資料：
 
 - 心率 `HEART_RATE`
-- 血氧 `SPO2`
+- 步數
 - 睡眠摘要與睡眠階段 `SLEEP`
+- 壓力
+- 站立達標時數
 
 ## 系統資料流
 
@@ -17,7 +19,7 @@ Amazfit Bip 6 感測器
           │
           ▼
 Zepp OS Device App
-  - 讀取心率、血氧與睡眠資料
+  - 讀取心率、步數、睡眠、壓力與站立達標時數
           │ Bluetooth
           ▼
 Zepp App Side Service
@@ -64,8 +66,10 @@ const bpm = heartRate.getLast();
 
 ```text
 心率 → HeartRate
-血氧 → BloodOxygen
+步數 → Step
 睡眠 → Sleep
+壓力 → Stress
+站立達標時數 → Stand
 ```
 
 Device App 取得資料後，使用 ZML 的 `this.request()`，透過 Bluetooth 將資料傳給手機 Zepp App 中運行的 Side Service。Side Service 程式位於 `zepp-health-sync-app/app-side/`，使用 `onRequest()` 接收 Device App 的訊息，再以 `fetch()` 將資料 POST 至 Nuxt API。
@@ -176,7 +180,7 @@ npx prisma migrate dev --name <change_name>
 - Nuxt 3 已結束官方一般維護；本專案用於學習與求職展示，若未來正式上線，需重新評估 Nuxt 4 升級與安全維護。
 - 使用 Vue 3 Composition API 建立儀表板。
 - 使用 Nuxt `useFetch` 或 `$fetch` 存取內部 API。
-- 顯示心率、血氧與睡眠的摘要及趨勢。
+- 顯示心率、步數、睡眠、壓力與站立達標時數的摘要及趨勢。
 
 ## 目標 Repository 結構
 
